@@ -1,0 +1,8 @@
+left_spec_id,right_spec_id
+www.sourceA.com//2,www.sourceB.com//2
+www.sourceA.com//3,www.sourceA.com//1
+www.sourceA.com//3,www.sourceB.com//3
+www.sourceA.com//3,www.sourceB.com//1
+www.sourceA.com//1,www.sourceB.com//3
+www.sourceA.com//1,www.sourceB.com//1
+www.sourceB.com//3,www.sourceB.com//1
