@@ -29,7 +29,7 @@ def create_dataframe(dataset_path):
             specification_number = specification.replace('.json', '')
             specification_id = '{}//{}'.format(source, specification_number)
             with open(os.path.join(dataset_path, source, specification)) as specification_file:
-                specification_data = json.load(specification_file)
+                specification_data = json.load(specification_file)                    
                 page_title = specification_data.get('<page title>').lower()
                 row = (source, specification_number, specification_id, page_title)
                 progressive_id2row_df.update({progressive_id: row})
