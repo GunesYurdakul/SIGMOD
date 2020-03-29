@@ -154,13 +154,20 @@ def compute_brand_blocking(df):
     for index, row in tqdm(df.iterrows()):
         page_title = row['page_title']
         page_title_list = page_title.split(" ")
-		#print (page_title_list)
+        key_list = []
         for blocking_key in blocking_keys:
             if blocking_key in page_title_list:
-                df.at[index, 'blocking_key'] = blocking_key
-                break         
+                #df.at[index, 'blocking_key'] = blocking_key   ##multiple groups ?
+                #break
+                if(blocking_key =="fuji"):
+                    blocking_key = "fujifilm"
+                key_list.append(blocking_key)
+        if not key_list:
+            key_list.append("other")
+        df.at[index, 'blocking_key'] = key_list 
+        
     print(df)
-    df.loc[df['blocking_key'] == '', 'blocking_key'] = 'other'
+   # df.loc[df['blocking_key'] == [], 'blocking_key'] = 'other'
     print('>>> Blocking computed successfully!\n')
     return df
 	
