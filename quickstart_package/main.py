@@ -186,7 +186,8 @@ def get_block_pairs_df(df):
         pairs_df (pd.DataFrame): A Pandas DataFrame containing pairs of specifications
     """
     print('>>> Creating pairs dataframe...\n')
-    grouped_df = df.groupby('blocking_key')
+    df = dataset_df.explode('blocking_key')
+    grouped_df 	= df.groupby('blocking_key')
     index_pairs = []
     for _, block in grouped_df:
         block_indexes = list(block.index)
