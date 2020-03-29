@@ -5,6 +5,32 @@ import itertools
 from tqdm import tqdm
 
 
+#Creates dataframe for brand blocking
+def create_brand_dataframe (dataset_path)
+    print('>>> Creating dataframe...\n')
+    columns_df = ['source', 'spec_number', 'spec_id', 'page_title','brand']
+
+    progressive_id = 0
+    progressive_id2row_df = {}
+    for source in tqdm(os.listdir(dataset_path)):
+        for specification in os.listdir(os.path.join(dataset_path, source)):
+            specification_number = specification.replace('.json', '')
+            specification_id = '{}//{}'.format(source, specification_number)
+            with open(os.path.join(dataset_path, source, specification)) as specification_file:
+                specification_data = json.load(specification_file)
+                brand =' '
+                page_title = specification_data.get('<page title>').lower()
+                if not (specification_data.get('brand') is None):
+                    brand = specification_data.get('brand')
+                row = (source, specification_number, specification_id, page_title, brand)
+                progressive_id2row_df.update({progressive_id: row})
+                progressive_id += 1
+    df = pd.DataFrame.from_dict(progressive_id2row_df, orient='index', columns=columns_df)
+    print(df)
+    print('>>> Dataframe created successfully!\n')
+    return df
+	
+	
 def create_dataframe(dataset_path):
     """Function used to create a Pandas DataFrame containing specifications page titles
 
@@ -86,6 +112,59 @@ def compute_blocking(df):
     print('>>> Blocking computed successfully!\n')
     return df
 
+	
+#Onur
+def brand_blocking_keys(df):
+    myList = df.loc[(df['source'] != "cammarkt.com") 
+                    & (df['source'] != "www.alibaba.com") 
+                    & (df['source'] != "www.buzzillions.com") 
+                    & (df['source'] != "www.canon-europe.com")
+                    & (df['source'] != "www.ebay.com")
+                    & (df['source'] != "www.gosale.com"), ['page_title']] 
+    #blackmagic
+    #ion camera ??? 
+    myList  = myList['page_title'].tolist()
+    myList = [i.split(' ')[0] for i in myList]
+    mySet = set(myList)
+    mySet.remove("buy")
+    mySet.remove("video")
+    mySet.remove("get")
+    mySet.remove("purchase")
+    mySet.append("sanyo")
+    print(mySet)
+    return mySet    
+
+#Onur
+def compute_brand_blocking(df):
+    """Function used to compute blocks before the matching phase
+
+    Gets a set of blocking keys and assigns to each specification the first blocking key that will match in the
+    corresponding page title.
+
+    Args:
+        df (pd.DataFrame): The Pandas DataFrame containing specifications and page titles
+
+    Returns:
+        df (pd.DataFrame): The Pandas DataFrame containing specifications, page titles and blocking keys
+    """
+
+    print('>>> Computing blocking...')
+    blocking_keys = brand_blocking_keys(df)
+    df['blocking_key'] = ''
+    for index, row in tqdm(df.iterrows()):
+        page_title = row['page_title']
+        page_title_list = page_title.split(" ")
+		#print (page_title_list)
+        for blocking_key in blocking_keys:
+            if blocking_key in page_title_list:
+                df.at[index, 'blocking_key'] = blocking_key
+                break         
+    print(df)
+    df.loc[df['blocking_key'] == '', 'blocking_key'] = 'other'
+    print('>>> Blocking computed successfully!\n')
+    return df
+	
+	
 
 def get_block_pairs_df(df):
     """Function used to get a Pandas DataFrame containing pairs of specifications based on the blocking keys
