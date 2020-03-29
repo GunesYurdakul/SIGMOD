@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 
 #Creates dataframe for brand blocking
-def create_brand_dataframe (dataset_path)
+def create_brand_dataframe (dataset_path):
     print('>>> Creating dataframe...\n')
     columns_df = ['source', 'spec_number', 'spec_id', 'page_title','brand']
 
@@ -130,7 +130,7 @@ def brand_blocking_keys(df):
     mySet.remove("video")
     mySet.remove("get")
     mySet.remove("purchase")
-    mySet.append("sanyo")
+    mySet.add("sanyo")
     print(mySet)
     return mySet    
 
@@ -186,7 +186,7 @@ def get_block_pairs_df(df):
         pairs_df (pd.DataFrame): A Pandas DataFrame containing pairs of specifications
     """
     print('>>> Creating pairs dataframe...\n')
-    df = dataset_df.explode('blocking_key')
+    df = df.explode('blocking_key')
     grouped_df 	= df.groupby('blocking_key')
     index_pairs = []
     for _, block in grouped_df:
