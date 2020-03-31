@@ -1,9 +1,27 @@
 import os
 import json
 import pandas as pd
+import re
 import itertools
 from tqdm import tqdm
 
+# Returns true if search_str contains regex exp
+def contains (exp, search_str):
+  if re.search(exp, search_str):
+    return True
+  return False
+
+# Returns all model words of a given matrix
+def extract_model_words (matrix):
+    all_model_words = []
+    is_model_word = re.compile('[0-9]+[^0-9]+|[^0-9]+[0-9]+')
+
+    for i in range(len(matrix)): 
+      for j in range(len(matrix[i])):
+        if (contains(is_model_word, matrix[i][j])):
+          all_model_words.append(matrix[i][j])
+
+    return all_model_words
 
 #Creates dataframe for brand blocking
 def create_brand_dataframe (dataset_path):
