@@ -23,6 +23,28 @@ def extract_model_words (matrix):
 
     return all_model_words
 
+def process_others(blocking_key, brand_list, df):
+    for index, row in df.iterrows():
+        key_list = []
+        brand = row['brand']  
+        brand = brand.lower()
+        blocking_key = row['blocking_key']
+
+        #print("key ",blocking_key,"brand",brand,"\n")
+        # and (brand in brand_list)
+        #print(brand)
+        #print (brand[0])
+        brand = brand.strip()
+        if (blocking_key[0] == 'other' and brand != ' ' and (brand in brand_list)):
+            key_list.append(brand)
+            #print ("before: ", df.loc[index, 'blocking_key'])
+            df.at[index, 'blocking_key'] = brand
+            #print ("after:", df.loc[index, 'blocking_key'])
+    print("ended")
+    return df
+
+
+
 #Creates dataframe for brand blocking
 def create_brand_dataframe (dataset_path):
     print('>>> Creating dataframe...\n')
@@ -40,11 +62,14 @@ def create_brand_dataframe (dataset_path):
                 page_title = specification_data.get('<page title>').lower()
                 if not (specification_data.get('brand') is None):
                     brand = specification_data.get('brand')
-                row = (source, specification_number, specification_id, page_title, brand)
+                if(isinstance(brand, str)):    
+                    row = (source, specification_number, specification_id, page_title, brand)
+                else:
+                    row = (source, specification_number, specification_id, page_title, brand[1])
                 progressive_id2row_df.update({progressive_id: row})
                 progressive_id += 1
     df = pd.DataFrame.from_dict(progressive_id2row_df, orient='index', columns=columns_df)
-    print(df)
+  #  print(df)
     print('>>> Dataframe created successfully!\n')
     return df
 	
@@ -104,6 +129,7 @@ def __get_blocking_keys(df):
     return blocking_keys
 
 
+
 def compute_blocking(df):
     """Function used to compute blocks before the matching phase
 
@@ -130,7 +156,16 @@ def compute_blocking(df):
     print('>>> Blocking computed successfully!\n')
     return df
 
-	
+def subgroup_blocking(title, brand):
+    subgroup_keys = ["coolpix", "powershot", "eon"]
+    if (brand == "canon" or brand == "nikon" or brand == "sony" or brand == "panasonic"):
+        for i in subgroup_keys:
+            if i in title:
+                brand = i
+                return brand
+    return brand
+
+
 #Onur
 def brand_blocking_keys(df):
     myList = df.loc[(df['source'] != "cammarkt.com") 
@@ -149,8 +184,12 @@ def brand_blocking_keys(df):
     mySet.remove("get")
     mySet.remove("purchase")
     mySet.add("sanyo")
-    print(mySet)
-    return mySet    
+    mySet.add("hikvision")
+    mySet.add("konica")
+    mySet.add("minolta")
+    mySet.add("dahua")
+    #print(mySet)
+    return mySet     
 
 #Onur
 def compute_brand_blocking(df):
@@ -177,15 +216,18 @@ def compute_brand_blocking(df):
             if blocking_key in page_title_list:
                 #df.at[index, 'blocking_key'] = blocking_key   ##multiple groups ?
                 #break
-                if(blocking_key =="fuji"):
+                if(blocking_key =="fuji" or blocking_key == "fuijifilm"):
                     blocking_key = "fujifilm"
+                if(blocking_key =="general"):
+                    blocking_key = "ge"
+                if(blocking_key =="minolta"):
+                    blocking_key = "konica"
+                blocking_key = subgroup_blocking(page_title, blocking_key)
                 key_list.append(blocking_key)
         if not key_list:
             key_list.append("other")
-        df.at[index, 'blocking_key'] = key_list 
-        
-    print(df)
-   # df.loc[df['blocking_key'] == [], 'blocking_key'] = 'other'
+        df.at[index, 'blocking_key'] = key_list      
+    df = process_others(blocking_key, blocking_keys, df)
     print('>>> Blocking computed successfully!\n')
     return df
 	
