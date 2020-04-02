@@ -4,6 +4,51 @@ import pandas as pd
 import re
 import itertools
 from tqdm import tqdm
+import numpy as np
+from scipy.sparse import csr_matrix
+from scipy.sparse.csgraph import connected_components
+import nltk 
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+
+
+def get_all_keys_values(dataset_path):
+    data_dict={}
+    progressive_id = 0
+    progressive_id2row_df = {}
+    for source in tqdm(os.listdir(dataset_path)):
+        for specification in os.listdir(os.path.join(dataset_path, source)):
+            specification_number = specification.replace('.json', '')
+            specification_id = '{}//{}'.format(source, specification_number)
+            with open(os.path.join(dataset_path, source, specification)) as specification_file:
+                specification_data = json.load(specification_file)
+                data_dict[specification_id]=specification_data
+    return data_dict
+
+def grouping_same_products_from_labelled_set(labelled_df):
+    correct_pairs = labelled_df[labelled_df['label']==1]
+    all_specs = list(labelled_df['left_spec_id'])+list(labelled_df['right_spec_id'])
+    all_specs = list(set(all_specs))
+
+    spec_to_idx = dict(zip(all_specs,list(range(len(all_specs)))))
+    idx_to_spec = dict(zip(list(range(len(all_specs))),all_specs))
+    graph=np.zeros((len(all_specs),len(all_specs)))
+
+    for idx,row in correct_pairs.iterrows():
+        left_idx=spec_to_idx[row['left_spec_id']]
+        right_idx=spec_to_idx[row['right_spec_id']]
+        graph[left_idx,right_idx]=1
+        graph[right_idx,left_idx]=1
+        
+    n_components, labels = connected_components(csgraph=graph, directed=False, return_labels=True)
+    same_products={}
+
+    for i in range(len(labels)):
+        if labels[i] not in same_products.keys():
+            same_products[labels[i]]=[]
+        same_products[labels[i]].append(idx_to_spec[i])
+        
+    return same_products
 
 # Returns true if search_str contains regex exp
 def contains (exp, search_str):
