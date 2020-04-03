@@ -7,6 +7,7 @@ from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
 from nltk.cluster import KMeansClusterer
 import nltk
+import main as sigmod
 
 nltk.download('stopwords')
 
@@ -19,14 +20,14 @@ def prepare_text_for_word2vec(data_dict):
         for feature,feature_text in features.items():
             if type(feature_text)==list:
                 feature_text=' '.join(feature_text)
-            feature_text = ' '.join([ word for word in feature_text.lower().split() if not word.lower() in stop_words])
-            tokens=[feature] + [' '.join(word_list) for word_list in list(everygrams(feature_text, 1, 3))]
+            feature_text = [ word for word in feature_text.lower().split() if not word.lower() in stop_words]
+            ngrams=[' '.join(word_list) for word_list in list(everygrams(feature_text, 2, 3))]
+            tokens=[feature] + sigmod.extract_model_words(ngrams)+ feature_text
             all_text.append(tokens)
+        i+=1
         if i%1000==0:
             print(i/len(data_dict.items()))
-        i+=1
     return all_text
-
 
 def get_grouped_features(dataset_df,assigned_clusters,labels):
     NUM_CLUSTERS=max(assigned_clusters)+1
@@ -44,13 +45,13 @@ def get_grouped_features(dataset_df,assigned_clusters,labels):
     for idx in range(NUM_CLUSTERS):
         dataset_df[idx]=dataset_df['all_features'].apply(lambda x: set_feature_value(idx,x,cluster2features))
 
-    return dataset_df
+    return dataset_df,cluster2features
 
 def set_feature_value(idx,features,cluster2features):
     grouped_features=[]
     for feature,value in features.items():
         if feature in cluster2features[idx]:
-            grouped_features.append(str(value))
+            grouped_features.append(str(value).lower())
     if len(grouped_features)==0:
         return ''
     return ' '.join(grouped_features)
