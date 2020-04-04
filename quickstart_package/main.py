@@ -68,7 +68,7 @@ def extract_model_words (matrix):
     return all_model_words
 
 def process_others(blocking_key, brand_list, df):
-    for index, row in tqdm(dataset_df.iterrows()):
+    for index, row in tqdm(df.iterrows()):
         key_list = []
         brand = row['brand']  
         brand = brand.lower()
@@ -84,7 +84,7 @@ def process_others(blocking_key, brand_list, df):
                 key_list.append(brand)
                 #if(item == "vista"):
                  #   print("brand ", brand, "item ", item)
-                dataset_df.at[index, 'blocking_key'] = item
+                df.at[index, 'blocking_key'] = item
                 
        # elif (blocking_key[0] == 'other' and brand != ' ' and !(brand in brand_list))
             
@@ -258,7 +258,7 @@ def brand_blocking_keys(df):
     mySet.add("lg")
     #mySet.add("svp")
     
-    print(mySet)
+
     return mySet  
 
 #Onur
