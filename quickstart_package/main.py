@@ -68,7 +68,7 @@ def extract_model_words (matrix):
     return all_model_words
 
 def process_others(blocking_key, brand_list, df):
-    for index, row in df.iterrows():
+    for index, row in tqdm(dataset_df.iterrows()):
         key_list = []
         brand = row['brand']  
         brand = brand.lower()
@@ -79,13 +79,19 @@ def process_others(blocking_key, brand_list, df):
         #print(brand)
         #print (brand[0])
         brand = brand.strip()
-        if (blocking_key[0] == 'other' and brand != ' ' and (brand in brand_list)):
-            key_list.append(brand)
-            #print ("before: ", df.loc[index, 'blocking_key'])
-            df.at[index, 'blocking_key'] = brand
-            #print ("after:", df.loc[index, 'blocking_key'])
+        for item in brand_list:
+            if (blocking_key[0] == 'other' and brand != '' and ((item in brand) or (brand in item))):
+                key_list.append(brand)
+                #if(item == "vista"):
+                 #   print("brand ", brand, "item ", item)
+                dataset_df.at[index, 'blocking_key'] = item
+                
+       # elif (blocking_key[0] == 'other' and brand != ' ' and !(brand in brand_list))
+            
     print("ended")
     return df
+#pairs_df = sigmod.get_block_pairs_df(dataset_df)
+#blocking_keys = brand_blocking_keys(df)
 
 
 
@@ -201,8 +207,8 @@ def compute_blocking(df):
     return df
 
 def subgroup_blocking(title, brand):
-    subgroup_keys = ["coolpix", "powershot", "eon"]
-    if (brand == "canon" or brand == "nikon" or brand == "sony" or brand == "panasonic"):
+    subgroup_keys = ["coolpix", "powershot", "eon", "eos", "alpha"]
+    if (brand == "canon" or brand == "nikon" or brand == "sony"):
         for i in subgroup_keys:
             if i in title:
                 brand = i
@@ -227,13 +233,33 @@ def brand_blocking_keys(df):
     mySet.remove("video")
     mySet.remove("get")
     mySet.remove("purchase")
+    #mySet.remove("bell+howell")
     mySet.add("sanyo")
     mySet.add("hikvision")
     mySet.add("konica")
     mySet.add("minolta")
     mySet.add("dahua")
-    #print(mySet)
-    return mySet     
+    mySet.add("epson")
+    mySet.add("bell")
+    mySet.add("hasselblad")
+    mySet.add("memoto")
+    mySet.add("vageeswari")
+    mySet.add("minox")
+    mySet.add("medion")
+    mySet.add("thomson")
+    mySet.add("advert")
+    mySet.add("phase")
+    mySet.add("aigo")
+    mySet.add("toshiba")
+    mySet.add("phillips")
+    mySet.add("vista")
+    mySet.add("vizio")
+    mySet.add("svp")
+    mySet.add("lg")
+    #mySet.add("svp")
+    
+    print(mySet)
+    return mySet  
 
 #Onur
 def compute_brand_blocking(df):
