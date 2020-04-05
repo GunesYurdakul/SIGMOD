@@ -234,28 +234,10 @@ def brand_blocking_keys(df):
     mySet.remove("get")
     mySet.remove("purchase")
     #mySet.remove("bell+howell")
-    mySet.add("sanyo")
-    mySet.add("hikvision")
-    mySet.add("konica")
-    mySet.add("minolta")
-    mySet.add("dahua")
-    mySet.add("epson")
-    mySet.add("bell")
-    mySet.add("hasselblad")
-    mySet.add("memoto")
-    mySet.add("vageeswari")
-    mySet.add("minox")
-    mySet.add("medion")
-    mySet.add("thomson")
-    mySet.add("advert")
-    mySet.add("phase")
-    mySet.add("aigo")
-    mySet.add("toshiba")
-    mySet.add("phillips")
-    mySet.add("vista")
-    mySet.add("vizio")
-    mySet.add("svp")
-    mySet.add("lg")
+    mySet.update(["nylon", "leather", "metal","emerson","enxun", "lg", "svp", "vizio", "vista", 
+                  "philips", "toshiba","aigo", "phase", "advert", "thomson", "medion", "minox", "vageeswari", 
+                  "memoto", "hasselblad", "bell", "epson", "dahua", "minolta", "konica", "hikvision", "sanyo", 
+                  "plastic", "security", "aluminum" ])
     #mySet.add("svp")
     
 
@@ -296,6 +278,8 @@ def compute_brand_blocking(df):
                 key_list.append(blocking_key)
         if not key_list:
             key_list.append("other")
+        key_list=set(key_list)
+        key_list = list(key_list)
         df.at[index, 'blocking_key'] = key_list      
     df = process_others(blocking_key, blocking_keys, df)
     print('>>> Blocking computed successfully!\n')
