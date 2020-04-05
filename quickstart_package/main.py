@@ -13,6 +13,7 @@ from nltk.tokenize import word_tokenize
 
 
 def get_all_keys_values(dataset_path):
+    stop_words=stopwords.words()
     data_dict={}
     progressive_id = 0
     progressive_id2row_df = {}
@@ -22,59 +23,64 @@ def get_all_keys_values(dataset_path):
             specification_id = '{}//{}'.format(source, specification_number)
             with open(os.path.join(dataset_path, source, specification)) as specification_file:
                 specification_data = json.load(specification_file)
+                for key,value in specification_data.items():
+                    if type(value)==list:
+                        value=' '.join(value)
+                    specification_data[key]=' '.join([ word for word in value.lower().split() if not word.lower() in stop_words])
                 data_dict[specification_id]=specification_data
     return data_dict
 
 def grouping_same_products_from_labelled_set(labelled_df):
-	correct_pairs = labelled_df[labelled_df['label']==1]
-	all_specs = list(labelled_df['left_spec_id'])+list(labelled_df['right_spec_id'])
-	all_specs = list(set(all_specs))
+    correct_pairs = labelled_df[labelled_df['label']==1]
+    all_specs = list(labelled_df['left_spec_id'])+list(labelled_df['right_spec_id'])
+    all_specs = list(set(all_specs))
 
-	spec_to_idx = dict(zip(all_specs,list(range(len(all_specs)))))
-	idx_to_spec = dict(zip(list(range(len(all_specs))),all_specs))
-	graph=np.zeros((len(all_specs),len(all_specs)))
+    spec_to_idx = dict(zip(all_specs,list(range(len(all_specs)))))
+    idx_to_spec = dict(zip(list(range(len(all_specs))),all_specs))
+    graph=np.zeros((len(all_specs),len(all_specs)))
 
-	for idx,row in correct_pairs.iterrows():
-	    left_idx=spec_to_idx[row['left_spec_id']]
-	    right_idx=spec_to_idx[row['right_spec_id']]
-	    graph[left_idx,right_idx]=1
-	    graph[right_idx,left_idx]=1
-	    TP += 1
-	    
-	n_components, labels = connected_components(csgraph=graph, directed=False, return_labels=True)
-	same_products={}
+    for idx,row in correct_pairs.iterrows():
+        left_idx=spec_to_idx[row['left_spec_id']]
+        right_idx=spec_to_idx[row['right_spec_id']]
+        graph[left_idx,right_idx]=1
+        graph[right_idx,left_idx]=1
+        
+    n_components, labels = connected_components(csgraph=graph, directed=False, return_labels=True)
+    same_products={}
 
-	for i in range(len(labels)):
-	    if labels[i] not in same_products.keys():
-	        same_products[labels[i]]=[]
-	    same_products[labels[i]].append(idx_to_spec[i])
-	    
-	return same_products
+    for i in range(len(labels)):
+        if labels[i] not in same_products.keys():
+            same_products[labels[i]]=[]
+        same_products[labels[i]].append(idx_to_spec[i])
+        
+    return same_products
+
+
 
 def calculate_f_measure(our_truth, ground_truth):
-	TP = 0
-	TN = 0
-	FP = 0
-	FN = 0
+    TP = 0
+    TN = 0
+    FP = 0
+    FN = 0
 
-	columns = ground_truth.shape[1]
+    columns = ground_truth.shape[1]
 
-	for j in range(columns):
-		for i in range(columns):
-			if our_truth[i][j] == 1 && ground_truth[i][j] == 1:
-				TP += 1
-			elif our_truth[i][j] == 1 && ground_truth[i][j] == 0:
-				FP += 1
-			elif our_truth[i][j] == 0 && ground_truth[i][j] == 1:
-				FN += 1
-			else:
-				TN += 1
+    for j in range(columns):
+        for i in range(columns):
+            if our_truth[i][j] == 1 && ground_truth[i][j] == 1:
+                TP += 1
+            elif our_truth[i][j] == 1 && ground_truth[i][j] == 0:
+                FP += 1
+            elif our_truth[i][j] == 0 && ground_truth[i][j] == 1:
+                FN += 1
+            else:
+                TN += 1
 
-	p = TP / (TP + FP)
-	r = TP / (TP + FN)
-	f_measure = (2 * p * r) / (p + r)	
+    p = TP / (TP + FP)
+    r = TP / (TP + FN)
+    f_measure = (2 * p * r) / (p + r)	
 
-	return f_measure
+    return f_measure
 
 # Returns true if search_str contains regex exp
 def contains (exp, search_str):
