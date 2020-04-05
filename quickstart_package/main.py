@@ -67,18 +67,18 @@ def calculate_f_measure(our_truth, ground_truth):
 
     for j in range(columns):
         for i in range(columns):
-            if our_truth[i][j] == 1 && ground_truth[i][j] == 1:
+            if our_truth[i][j] == 1 and ground_truth[i][j] == 1:
                 TP += 1
-            elif our_truth[i][j] == 1 && ground_truth[i][j] == 0:
+            elif our_truth[i][j] == 1 and ground_truth[i][j] == 0:
                 FP += 1
-            elif our_truth[i][j] == 0 && ground_truth[i][j] == 1:
+            elif our_truth[i][j] == 0 and ground_truth[i][j] == 1:
                 FN += 1
             else:
                 TN += 1
 
     p = TP / (TP + FP)
     r = TP / (TP + FN)
-    f_measure = (2 * p * r) / (p + r)	
+    f_measure = (2 * p * r) / (p + r)
 
     return f_measure
 

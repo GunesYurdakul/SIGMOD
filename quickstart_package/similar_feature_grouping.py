@@ -20,9 +20,8 @@ def prepare_text_for_word2vec(data_dict):
         for feature,feature_text in features.items():
             if type(feature_text)==list:
                 feature_text=' '.join(feature_text)
-            feature_text = [ word for word in feature_text.lower().split() if not word.lower() in stop_words]
-            ngrams=[' '.join(word_list) for word_list in list(everygrams(feature_text, 2, 3))]
-            tokens=[feature] + sigmod.extract_model_words(ngrams)+ feature_text
+            ngrams=[' '.join(word_list) for word_list in list(everygrams(feature_text.split(), 2, 3))]
+            tokens=[feature] + sigmod.extract_model_words(ngrams)+ feature_text.split()
             all_text.append(tokens)
         i+=1
         if i%1000==0:
@@ -51,7 +50,7 @@ def set_feature_value(idx,features,cluster2features):
     grouped_features=[]
     for feature,value in features.items():
         if feature in cluster2features[idx]:
-            grouped_features.append(str(value).lower())
+            grouped_features.append(str(value))
     if len(grouped_features)==0:
         return ''
     return ' '.join(grouped_features)
