@@ -54,13 +54,15 @@ class EntityResolutionEngine():
         model_vec=self.word2vec_model.wv[brand]
         if len(words)>1 and words[0] in self.word2vec_model.wv: 
             model_vec= self.word2vec_model.wv[words[0]] 
+        if len(words)>2 and words[1] in self.word2vec_model.wv: 
+            model_vec2= self.word2vec_model.wv[words[1]] 
         for i in range(len(words[1:])):
             word=words[i]
             if word in self.word2vec_model.wv:
                 avg += self.word2vec_model.wv[word]  
         if len(words)>0:
             avg= avg/(len(words))
-        return np.concatenate((model_vec,avg))
+        return np.concatenate((model_vec,model_vec2,avg))
     
     #set feature vector of selected block
     def set_block(self,blocking_key):
@@ -69,12 +71,12 @@ class EntityResolutionEngine():
         for index, row in self.block_df.iterrows():
             x=row['page_title']
             self.block_df.at[index,'concat_wordvector']=self.get_avg_vector(\
-                ' '.join([' '.join(x[idx:].split()[:3]) for idx in [x.start() for x in re.finditer(blocking_key, x)]] + [' '.join(sigmod.extract_model_words(token)) for token in list(everygrams(x.split(),2,3))]),blocking_key)     
+                ' '.join([' '.join(x[idx:].split()[:4]) for idx in [x.start() for x in re.finditer(blocking_key, x)]] + [' '.join(sigmod.extract_model_words(token)) for token in list(everygrams(x.split(),2,3))]),blocking_key)     
         return
     
     #for dimensionality reduction
     def run_TSNE(self,n_components_=2,n_iter_=1000, perplexity_=20):
-        X=np.zeros((len(self.block_df),400))
+        X=np.zeros((len(self.block_df),600))
         for i in range(len(self.block_df)):
             X[i]=self.block_df['concat_wordvector'][i]
 
