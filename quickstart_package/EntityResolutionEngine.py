@@ -56,12 +56,12 @@ class EntityResolutionEngine():
             model_vec= self.word2vec_model.wv[words[0]] 
         if len(words)>2 and words[1] in self.word2vec_model.wv: 
             model_vec2= self.word2vec_model.wv[words[1]] 
-        for i in range(len(words[1:])):
+        for i in range(len(words[2:])):
             word=words[i]
             if word in self.word2vec_model.wv:
                 avg += self.word2vec_model.wv[word]  
-        if len(words)>0:
-            avg= avg/(len(words))
+        if (len(words)-2)>0:
+            avg= avg/(len(words)-2)
         return np.concatenate((model_vec,model_vec2,avg))
     
     #set feature vector of selected block
