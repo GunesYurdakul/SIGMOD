@@ -17,7 +17,7 @@ from sklearn.cluster import DBSCAN
 import numpy as np
 import main as sigmod
 from itertools import combinations 
-
+import helper as helper
 class EntityResolutionEngine():
 
 
@@ -28,6 +28,7 @@ class EntityResolutionEngine():
         self.labelled_df = labelled_df
         self.block_df=None
         self.output_df=pd.DataFrame(columns=['left_spec_id','right_spec_id'])
+        self.product_clusters=list()
 
     def set_model_words_column(self):
         
@@ -81,32 +82,30 @@ class EntityResolutionEngine():
         np.set_printoptions(suppress=True)
         self.T = tsne.fit_transform(X)
         self.labels = self.block_df['spec_number'].values
-        return self.labels
+        return self.labels,self.T
     
     #clustering
     def run_DBSCAN(self,eps_=8, min_samples_=3):
         kclusterer = DBSCAN(eps=eps_, min_samples=min_samples_).fit(self.T)
         self.assigned_clusters = kclusterer.labels_
         self.block_df['inblock_cluster'] = self.assigned_clusters
-        return self.assigned_clusters,self.T
-    
-    def get_pairs(self, threshold):
-        block_pairs_df=pd.DataFrame(columns=['left_title','right_title'])
+        
         block_group_df = self.block_df.groupby('inblock_cluster')
-        product_clusters=list()
         cluster_indices = list(set(self.assigned_clusters))
         for i in range(min(cluster_indices),max(cluster_indices)+1):
-            product_clusters.append(list(block_group_df.get_group(i).index))
-            
-        i=0
-        for product_group in product_clusters:
-            i+=1
-            if i%100==0:
-                print(i/(len(product_clusters)))
-            pairs=combinations(product_group,2)
+            self.product_clusters.append(list(block_group_df.get_group(i).index))
+        return
 
+    def get_pairs(self, threshold):
+        i=0
+        for product_group in self.product_clusters:
+            i+=1
+            if i%5==0:
+                print(i/(len(self.product_clusters)))
+            pairs=combinations(product_group,2)
             for pair in pairs:
-                if self.get_similarity(self.dataset_df.loc[pair[0]].words_to_compare,self.dataset_df.loc[pair[1]].words_to_compare)>threshold:
+                similarity = self.get_similarity(self.dataset_df.loc[pair[0]].words_to_compare,self.dataset_df.loc[pair[1]].words_to_compare)
+                if similarity>threshold:
                     self.output_df = self.output_df.append({'left_spec_id': pair[0],'right_spec_id': pair[1]}, ignore_index=True)
-                    block_pairs = block_pairs.append({'left_title': self.dataset_df.loc[pair[0]].page_title,'right_title': self.dataset_df.loc[pair[0]].page_title}, ignore_index=True)
-        return product_clusters, block_pairs_df
+        return 
+    
