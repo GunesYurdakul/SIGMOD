@@ -27,7 +27,7 @@ class EntityResolutionEngine():
         self.grouped_df = self.dataset_df.groupby(['blocking_key'])
         self.labelled_df = labelled_df
         self.block_df=None
-        self.output_df=pd.DataFrame(columns=['left_spec_id','right_spec_id'])
+        self.output_df=pd.DataFrame(columns=['left_spec_id','right_spec_id','left_page_title','right_page_title'])
         self.product_clusters=list()
 
     def set_model_words_column(self):
@@ -106,6 +106,6 @@ class EntityResolutionEngine():
             for pair in pairs:
                 similarity = self.get_similarity(self.dataset_df.loc[pair[0]].words_to_compare,self.dataset_df.loc[pair[1]].words_to_compare)
                 if similarity>threshold:
-                    self.output_df = self.output_df.append({'left_spec_id': pair[0],'right_spec_id': pair[1]}, ignore_index=True)
+                    self.output_df = self.output_df.append({'left_spec_id': pair[0],'right_spec_id': pair[1], 'left_page_title': self.dataset_df.loc[pair[0]].page_title,'right_page_title':self.dataset_df.loc[pair[1]].page_title }, ignore_index=True)
         return 
     
