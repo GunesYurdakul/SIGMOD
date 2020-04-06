@@ -13,7 +13,6 @@ nltk.download('stopwords')
 
 
 def prepare_text_for_word2vec(data_dict):
-    stop_words=stopwords.words()
     all_text=[]
     i=0
     for id_, features in data_dict.items():

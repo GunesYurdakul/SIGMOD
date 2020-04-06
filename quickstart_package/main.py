@@ -13,7 +13,7 @@ from nltk.tokenize import word_tokenize
 
 
 def get_all_keys_values(dataset_path):
-    stop_words=stopwords.words()
+    stop_words=stopwords.words('english')
     data_dict={}
     progressive_id = 0
     progressive_id2row_df = {}
@@ -53,7 +53,7 @@ def grouping_same_products_from_labelled_set(labelled_df):
             same_products[labels[i]]=[]
         same_products[labels[i]].append(idx_to_spec[i])
         
-    return same_products
+    return same_products,graph
 
 
 
