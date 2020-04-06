@@ -57,13 +57,13 @@ class EntityResolutionEngine():
             model_vec= self.word2vec_model.wv[words[0]] 
         if len(words)>2 and words[1] in self.word2vec_model.wv: 
             model_vec2= self.word2vec_model.wv[words[1]] 
-        for i in range(len(words[2:])):
-            word=words[i]
-            if word in self.word2vec_model.wv:
-                avg += self.word2vec_model.wv[word]  
-        if (len(words)-2)>0:
-            avg= avg/(len(words)-2)
-        return np.concatenate((model_vec,model_vec2,avg))
+        #for i in range(len(words[2:])):
+        #    word=words[i]
+         #   if word in self.word2vec_model.wv:
+          #      avg += self.word2vec_model.wv[word]  
+  #      if (len(words)-2)>0:
+   #         avg= avg/(len(words)-2)
+        return np.concatenate((model_vec,model_vec2))
     
     #set feature vector of selected block
     def set_block(self,blocking_key):
@@ -77,7 +77,7 @@ class EntityResolutionEngine():
     
     #for dimensionality reduction
     def run_TSNE(self,n_components_=2,n_iter_=1000, perplexity_=20):
-        X=np.zeros((len(self.block_df),600))
+        X=np.zeros((len(self.block_df),400))
         for i in range(len(self.block_df)):
             X[i]=self.block_df['concat_wordvector'][i]
 

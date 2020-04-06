@@ -33,7 +33,10 @@ def get_all_keys_values(dataset_path):
                 for key,value in specification_data.items():
                     if type(value)==list:
                         value=' '.join(value)
-                    specification_data[key]=' '.join([ word for word in value.lower().split() if not word.lower() in stop_words])
+                    text=' '.join([ word for word in value.lower().split() if not word.lower() in stop_words])
+                    text=text.replace(' - ',' ')
+                    text=text.replace(' | ',' ')
+                    specification_data[key]=text
                 data_dict[specification_id]=specification_data
     return data_dict
 
