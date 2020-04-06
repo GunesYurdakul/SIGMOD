@@ -52,6 +52,7 @@ class EntityResolutionEngine():
         x=x.replace('  ',' ')
         words = x.split() 
         model_vec=self.word2vec_model.wv[brand]
+        model_vec2=self.word2vec_model.wv[brand]
         if len(words)>1 and words[0] in self.word2vec_model.wv: 
             model_vec= self.word2vec_model.wv[words[0]] 
         if len(words)>2 and words[1] in self.word2vec_model.wv: 
