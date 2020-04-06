@@ -12,6 +12,13 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 
 
+def get_similarity(str1,str2):
+    try:
+        similarity=helper.cosine_sim(helper.text_to_ngrams(str1,3,'chars'),helper.text_to_ngrams(str2,3,'chars'))
+    except:
+        return 0
+    return similarity
+
 def get_all_keys_values(dataset_path):
     stop_words=stopwords.words('english')
     data_dict={}
@@ -29,6 +36,26 @@ def get_all_keys_values(dataset_path):
                     specification_data[key]=' '.join([ word for word in value.lower().split() if not word.lower() in stop_words])
                 data_dict[specification_id]=specification_data
     return data_dict
+
+def grouping_same_products(correct_pairs,spec_to_idx,idx_to_spec):
+
+    graph=np.zeros((len(all_specs),len(all_specs)))
+
+    for idx,row in correct_pairs.iterrows():
+        left_idx=spec_to_idx[row['left_spec_id']]
+        right_idx=spec_to_idx[row['right_spec_id']]
+        graph[left_idx,right_idx]=1
+        graph[right_idx,left_idx]=1
+        
+    n_components, labels = connected_components(csgraph=graph, directed=False, return_labels=True)
+    same_products={}
+
+    for i in range(len(labels)):
+        if labels[i] not in same_products.keys():
+            same_products[labels[i]]=[]
+        same_products[labels[i]].append(idx_to_spec[i])
+        
+    return same_products,graph
 
 def grouping_same_products_from_labelled_set(labelled_df):
     correct_pairs = labelled_df[labelled_df['label']==1]
@@ -53,8 +80,7 @@ def grouping_same_products_from_labelled_set(labelled_df):
             same_products[labels[i]]=[]
         same_products[labels[i]].append(idx_to_spec[i])
         
-    return same_products,graph
-
+    return same_products,graph,spec_to_idx,idx_to_spec
 
 
 def calculate_f_measure(our_truth, ground_truth):
@@ -79,8 +105,7 @@ def calculate_f_measure(our_truth, ground_truth):
     p = TP / (TP + FP)
     r = TP / (TP + FN)
     f_measure = (2 * p * r) / (p + r)
-
-    return f_measure
+    return p, r, f_measure
 
 # Returns true if search_str contains regex exp
 def contains (exp, search_str):
