@@ -156,6 +156,7 @@ def create_brand_dataframe (dataset_path):
     return df
 
 
+
 def create_dataframe(dataset_path):
     """Function used to create a Pandas DataFrame containing specifications page titles
 
@@ -269,22 +270,20 @@ def brand_blocking_keys(df):
     mySet.update(["nylon", "leather", "metal","emerson","enxun", "lg", "svp", "vizio", "vista", 
                   "philips", "toshiba","aigo", "phase", "advert", "thomson", "medion", "minox", "vageeswari", 
                   "memoto", "hasselblad", "bell", "epson", "dahua", "minolta", "konica", "hikvision", "sanyo", 
-                  "plastic", "security", "aluminum" ])
-    #mySet.add("svp")
+                  "plastic", "security", "aluminum", "pioneer","pen","hidden", "spy", "night","cctv","pioneer",
+                  "bag", "shimano"])
+    mySet.update(["hikvisionip", "hikvision1.3mp", "hiksion", "hiksision"])  #edgecases
     
-
-    return mySet  
+    #hikvisionip, hikvision1.3mp hiksion hiksision 
+    return mySet
 
 #Onur
 def compute_brand_blocking(df):
     """Function used to compute blocks before the matching phase
-
     Gets a set of blocking keys and assigns to each specification the first blocking key that will match in the
     corresponding page title.
-
     Args:
         df (pd.DataFrame): The Pandas DataFrame containing specifications and page titles
-
     Returns:
         df (pd.DataFrame): The Pandas DataFrame containing specifications, page titles and blocking keys
     """
@@ -306,6 +305,8 @@ def compute_brand_blocking(df):
                     blocking_key = "ge"
                 if(blocking_key =="minolta"):
                     blocking_key = "konica"
+                if(blocking_key == "hikvisionip" or blocking_key =="hikvision1.3mp" or blocking_key =="hiksion" or blocking_key == "hiksision"):
+                    blocking_key = "hikvision"
                 blocking_key = subgroup_blocking(page_title, blocking_key)
                 key_list.append(blocking_key)
         if not key_list:
@@ -315,9 +316,10 @@ def compute_brand_blocking(df):
         df.at[index, 'blocking_key'] = key_list      
     df = process_others(blocking_key, blocking_keys, df)
     print('>>> Blocking computed successfully!\n')
+    df = df.explode('blocking_key')
+    df.loc[df['blocking_key'] == 'fuji', 'blocking_key'] = 'fujifilm'
+    df.loc[df['blocking_key'] == 'bell+howell', 'blocking_key'] = 'bell'
     return df
-	
-	
 
 def get_block_pairs_df(df):
     """Function used to get a Pandas DataFrame containing pairs of specifications based on the blocking keys
