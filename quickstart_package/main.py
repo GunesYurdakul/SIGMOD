@@ -35,9 +35,27 @@ def get_all_keys_values(dataset_path):
                         value=' '.join(value)
                     text=' '.join([ word for word in value.lower().split() if not word.lower() in stop_words])
                     text=text.replace(' - ',' ')
+                    text=text.replace('-',' ')
+                    text=text.replace(',',' ')
+                    text=text.replace(' /',' ')
                     text=text.replace(' | ',' ')
+                    text=text.replace('|',' ')
                     text=text.replace(' . ',' ')
                     text=text.replace('"',' ')
+                    text=text.replace('photo smart','photosmart')
+                    text=text.replace('series','')
+                    text=text.replace('pentax k','pentax k ')
+                    text=text.replace('pentax k  ','pentax k ')
+                    text=text.replace('fine pix','finepix')
+                    text=text.replace('exlim','exilim')
+                    text=text.replace('eos 1dx','eos 1d x')
+                    text=text.replace(' + ',' ')
+                    text=text.replace(' (',' ')
+                    text=text.replace(') ',' ')
+                    text=text.replace(' mp','mp')
+                    if 'fujifilm' in text:
+                        text=text.replace('exr',' exr')
+                                      
                     specification_data[key]=text
                 data_dict[specification_id]=specification_data
     return data_dict
