@@ -296,24 +296,29 @@ def brand_blocking_keys(df):
     mySet.remove("video")
     mySet.remove("get")
     mySet.remove("purchase")
+    mySet.remove("ricoh")
+    mySet.remove("tokina")
+    mySet.remove("samyang")
+    mySet.remove("lowepro")
+    mySet.remove("pov")
     #mySet.remove("bell+howell")
-    mySet.update(["nylon", "leather", "metal","emerson","enxun", "lg", "svp", "vizio", "vista", 
-                  "philips", "toshiba","aigo", "phase", "advert", "thomson", "medion", "minox", "vageeswari", 
-                  "memoto", "hasselblad", "bell", "epson", "dahua", "minolta", "konica", "hikvision", "sanyo", 
-                  "plastic", "security", "aluminum", "pioneer","pen","hidden", "spy", "night","cctv","pioneer",
-                  "bag", "shimano"])
+    mySet.update(["emerson","enxun", "lg", "svp", "vizio", "vista", "philips", "toshiba","aigo", "phase", "advert", "thomson", "medion", "minox", "vageeswari", 
+                  "memoto", "hasselblad", "bell", "epson", "dahua", "minolta", "konica", "hikvision", "sanyo", "spy","pioneer", "shimano"])
     mySet.update(["hikvisionip", "hikvision1.3mp", "hiksion", "hiksision"])  #edgecases
     
     #hikvisionip, hikvision1.3mp hiksion hiksision 
-    return mySet
+    return mySet 
 
 #Onur
 def compute_brand_blocking(df):
     """Function used to compute blocks before the matching phase
+
     Gets a set of blocking keys and assigns to each specification the first blocking key that will match in the
     corresponding page title.
+
     Args:
         df (pd.DataFrame): The Pandas DataFrame containing specifications and page titles
+
     Returns:
         df (pd.DataFrame): The Pandas DataFrame containing specifications, page titles and blocking keys
     """
@@ -342,11 +347,14 @@ def compute_brand_blocking(df):
         if not key_list:
             key_list.append("other")
         key_list=set(key_list)
+        if(len(key_list) > 1 and (df.at[index,'brand'] == ' ') and ("leica" not in key_list) and ("tamron" not in key_list) and ("lowepro" not in key_list)and  ("sigma" not in key_list) and  ("polaroid" not in key_list) ):
+
+            key_list = ['accessory']
         key_list = list(key_list)
         df.at[index, 'blocking_key'] = key_list      
     df = process_others(blocking_key, blocking_keys, df)
     print('>>> Blocking computed successfully!\n')
-    df = df.explode('blocking_key')
+    #df = df.explode('blocking_key')
     df.loc[df['blocking_key'] == 'fuji', 'blocking_key'] = 'fujifilm'
     df.loc[df['blocking_key'] == 'bell+howell', 'blocking_key'] = 'bell'
     return df
