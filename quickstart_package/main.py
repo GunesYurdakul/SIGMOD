@@ -172,6 +172,9 @@ def create_brand_dataframe (dataset_path):
                 specification_data = json.load(specification_file)
                 brand =' '
                 page_title = specification_data.get('<page title>').lower()
+                page_title = page_title.replace('cannon', 'canon') 
+                page_title = page_title.replace('power shot', 'powershot') 
+                page_title = page_title.replace('ricoh', 'pentax')
                 if not (specification_data.get('brand') is None):
                     brand = specification_data.get('brand')
                 if(isinstance(brand, str)):    
