@@ -24,7 +24,7 @@ class EntityResolutionEngine():
     def __init__(self, word2vec_model, dataset_df, labelled_df):
         self.word2vec_model = word2vec_model
         self.dataset_df = dataset_df
-        self.grouped_df = self.dataset_df.groupby(['blocking_key'])
+        self.grouped_df = self.dataset_df.groupby(['model_name'])
         self.labelled_df = labelled_df
         self.block_df=None
         self.output_df=pd.DataFrame(columns=['left_spec_id','right_spec_id','left_page_title','right_page_title'])
@@ -69,10 +69,10 @@ class EntityResolutionEngine():
     def set_block(self,blocking_key):
         self.block_df = self.grouped_df.get_group(blocking_key)
         self.block_df['concat_wordvector']=''
-        for index, row in self.block_df.iterrows():
-            x=row['page_title']
-            self.block_df.at[index,'concat_wordvector']=self.get_avg_vector(\
-                ' '.join([' '.join(x[idx:].split()[:4]) for idx in [x.start() for x in re.finditer(blocking_key, x)]] + [' '.join(sigmod.extract_model_words(token)) for token in list(everygrams(x.split(),2,3))]),blocking_key)     
+   #     for index, row in self.block_df.iterrows():
+    #        x=row['page_title']
+            #self.block_df.at[index,'concat_wordvector']=self.get_avg_vector(\
+                #' '.join([' '.join(x[idx:].split()[:4]) for idx in [x.start() for x in re.finditer(blocking_key, x)]] + [' '.join(sigmod.extract_model_words(token)) for token in list(everygrams(x.split(),2,3))]),blocking_key)     
         return
     
     #for dimensionality reduction

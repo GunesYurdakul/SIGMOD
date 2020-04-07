@@ -10,7 +10,7 @@ from scipy.sparse.csgraph import connected_components
 import nltk 
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
-
+import pickle
 
 def get_similarity(str1,str2):
     try:
@@ -24,35 +24,18 @@ def get_all_keys_values(dataset_path):
     data_dict={}
     progressive_id = 0
     progressive_id2row_df = {}
+
     for source in tqdm(os.listdir(dataset_path)):
         for specification in os.listdir(os.path.join(dataset_path, source)):
             specification_number = specification.replace('.json', '')
             specification_id = '{}//{}'.format(source, specification_number)
             with open(os.path.join(dataset_path, source, specification)) as specification_file:
                 specification_data = json.load(specification_file)
-                for key,value in specification_data.items():
-                    if type(value)==list:
-                        value=' '.join(value)
-                    text=' '.join([ word for word in value.lower().split() if not word.lower() in stop_words])
-                    text=text.replace(' - ',' ')
-                    text=text.replace('-',' ')
-                    text=text.replace(',',' ')
-                    text=text.replace(' /',' ')
-                    text=text.replace(' | ',' ')
-                    text=text.replace('|',' ')
-                    text=text.replace(' . ',' ')
-                    text=text.replace('"',' ')
-                    text=text.replace('photo smart','photosmart')
-                    text=text.replace('series','')
-                    text=text.replace('pentax k','pentax k ')
-                    text=text.replace('pentax k  ','pentax k ')
-                    text=text.replace('fine pix','finepix')
-                    text=text.replace('exlim','exilim')
-                    text=text.replace('eos 1dx','eos 1d x')
-                    text=text.replace(' + ',' ')
-                    text=text.replace(' (',' ')
-                    text=text.replace(') ',' ')
-                    text=text.replace(' mp','mp')
+                for key,text in specification_data.items():
+                    if type(text)==list:
+                        text=' '.join(text)
+                    
+                    text=' '.join([ word for word in text.lower().split() if not (word.lower() in stop_words)])
                     if 'fujifilm' in text:
                         text=text.replace('exr',' exr')
                                       
@@ -179,6 +162,29 @@ def process_others(blocking_key, brand_list, df):
 
 #Creates dataframe for brand blocking
 def create_brand_dataframe (dataset_path):
+    stop_words=stopwords.words('english')
+
+    skip_words=['alibaba.com','buy',
+             'sale',
+             'digital',
+             'product',
+             'ebay',
+             'instant',
+             'type',
+             'camera',
+             'cameras',
+             'high',
+             'resolution',
+             'memory',
+             'full',
+             'bundle',
+             'mirrorless',
+             'price',
+             'body',
+             'series',
+             'tough',
+             'refurbished',
+             'color']
     print('>>> Creating dataframe...\n')
     columns_df = ['source', 'spec_number', 'spec_id', 'page_title','brand']
 
@@ -191,10 +197,46 @@ def create_brand_dataframe (dataset_path):
             with open(os.path.join(dataset_path, source, specification)) as specification_file:
                 specification_data = json.load(specification_file)
                 brand =' '
+                
                 page_title = specification_data.get('<page title>').lower()
+                page_title=page_title.replace(' - ',' ')
+                page_title=page_title.replace('-',' ')
+                page_title=page_title.replace(',',' ')
+                page_title=page_title.replace(' /',' ')
+                page_title=page_title.replace(' | ',' ')
+                page_title=page_title.replace('|',' ')
+                page_title=page_title.replace(' . ',' ')
+                page_title=page_title.replace('"',' ')
+                page_title=page_title.replace('photo smart','photosmart')
                 page_title = page_title.replace('cannon', 'canon') 
-                page_title = page_title.replace('power shot', 'powershot') 
                 page_title = page_title.replace('ricoh', 'pentax')
+                page_title=page_title.replace('minotla','minolta')
+                page_title=page_title.replace('minolta','konica')
+                page_title=page_title.replace('cyber shot','cybershot')
+                page_title=page_title.replace('power shot','powershot')
+                page_title=page_title.replace('poweshot','powershot')
+                page_title=page_title.replace('*istdl','*ist dl')
+                page_title=page_title.replace('series','')
+                page_title=page_title.replace('pentax k','pentax k ')
+                page_title=page_title.replace('pentax k  ','pentax k ')
+                page_title=page_title.replace('fine pix','finepix')
+                page_title=page_title.replace('fuji ','fujifilm ')
+                page_title=page_title.replace('fuijifilm','fujifilm')
+                page_title=page_title.replace('exlim','exilim')
+                page_title=page_title.replace('eos 1dx','eos 1d x')
+                page_title=page_title.replace(' + ',' ')
+                page_title=page_title.replace(' (',' ')
+                page_title=page_title.replace(') ',' ')
+                page_title=page_title.replace(' mp','mp')
+                page_title=page_title.replace(' p ','p ')
+                page_title=page_title.replace('megapixel','hikvision')
+                page_title=page_title.replace('hikvisionip','hikvision')
+                page_title=page_title.replace('hikvision1.3mp','hikvision 1.3mp')
+                page_title=page_title.replace('hiksion','hikvision')
+                page_title=page_title.replace('hiksision','hikvision')
+                
+                page_title=' '.join([ word for word in page_title.lower().split() if (not (word.lower() in stop_words)) and (not(word.lower() in skip_words))])
+                
                 if not (specification_data.get('brand') is None):
                     brand = specification_data.get('brand')
                 if(isinstance(brand, str)):    
@@ -294,7 +336,7 @@ def compute_blocking(df):
     return df
 
 def subgroup_blocking(title, brand):
-    subgroup_keys = ["coolpix", "powershot", "eon", "eos", "alpha"]
+    subgroup_keys = ["coolpix", "powershot", "eos", "alpha"]
     if (brand == "canon" or brand == "nikon" or brand == "sony"):
         for i in subgroup_keys:
             if i in title:
@@ -315,7 +357,6 @@ def brand_blocking_keys(df):
     myList  = myList['page_title'].tolist()
     myList = [i.split(' ')[0] for i in myList]
     mySet = set(myList)
-    mySet.remove("buy")
     mySet.remove("video")
     mySet.remove("get")
     mySet.remove("purchase")
@@ -348,6 +389,7 @@ def compute_brand_blocking(df):
 
     print('>>> Computing blocking...')
     blocking_keys = brand_blocking_keys(df)
+
     df['blocking_key'] = ''
     for index, row in tqdm(df.iterrows()):
         page_title = row['page_title']
@@ -357,15 +399,9 @@ def compute_brand_blocking(df):
             if blocking_key in page_title_list:
                 #df.at[index, 'blocking_key'] = blocking_key   ##multiple groups ?
                 #break
-         
-                if(blocking_key =="fuji" or blocking_key == "fuijifilm"):
-                    blocking_key = "fujifilm"
                 if(blocking_key =="general"):
                     blocking_key = "ge"
-                if(blocking_key =="minolta"):
-                    blocking_key = "konica"
-                if(blocking_key == "hikvisionip" or blocking_key =="hikvision1.3mp" or blocking_key =="hiksion" or blocking_key == "hiksision"):
-                    blocking_key = "hikvision"
+
                 blocking_key = subgroup_blocking(page_title, blocking_key)
                 key_list.append(blocking_key)
         if not key_list:
@@ -386,13 +422,48 @@ def compute_brand_blocking(df):
         df.at[index, 'blocking_key'] = key_list      
     df = process_others(blocking_key, blocking_keys, df)
     print('>>> Blocking computed successfully!\n')
-    #df = df.explode('blocking_key')
+    df = df.explode('blocking_key')
     df.loc[df['blocking_key'] == 'fuji', 'blocking_key'] = 'fujifilm'
     df.loc[df['blocking_key'] == 'bell+howell', 'blocking_key'] = 'bell'
     return df
 
 
+def compute_model_blocking(df,blocking_keys):
+    """Function used to compute blocks before the matching phase
 
+    Gets a set of blocking keys and assigns to each specification the first blocking key that will match in the
+    corresponding page title.
+
+    Args:
+        df (pd.DataFrame): The Pandas DataFrame containing specifications and page titles
+
+    Returns:
+        df (pd.DataFrame): The Pandas DataFrame containing specifications, page titles and blocking keys
+    """
+
+    print('>>> Computing blocking...')
+    
+    df['model_name'] = ''
+    for index, row in tqdm(df.iterrows()):
+        page_title = row['page_title']
+        
+        key_list = []
+        for blocking_key,value in blocking_keys.items():
+            if blocking_key in page_title:
+                df.at[index, 'model_name'] = blocking_key      
+                if type(value)==dict:
+                    for sub_key,sub_value in value.items():
+                        if sub_key in page_title:
+                            df.at[index, 'model_name'] = sub_key 
+                            if type(sub_value)==dict:
+                                for sub_key_2,sub_value2 in sub_value.items():
+                                    if sub_key_2 in page_title:
+                                        df.at[index, 'model_name'] = sub_key2
+
+                            
+    print('>>> Blocking computed successfully!\n')
+    return df
+ 
 
 def get_block_pairs_df(df):
     """Function used to get a Pandas DataFrame containing pairs of specifications based on the blocking keys
