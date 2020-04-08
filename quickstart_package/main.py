@@ -275,7 +275,8 @@ def create_brand_dataframe (dataset_path):
                 page_title=page_title.replace('hiksion','hikvision')
                 page_title=page_title.replace('hiksision','hikvision')
                 page_title=page_title.replace('sony alpha a','sony a')
-                page_title=page_title.replace(' \u00ce\u0091','')
+                page_title=page_title.replace(' î','   ')
+                
                 
                 
                 page_title=' '.join([ word for word in page_title.lower().split() if (not (word.lower() in stop_words)) and (not(word.lower() in skip_words))])
