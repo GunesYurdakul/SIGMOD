@@ -12,6 +12,12 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 import pickle
 
+def get_similarity(str1,str2):
+    try:
+        similarity=helper.cosine_sim(helper.text_to_ngrams(str1,3,'chars'),helper.text_to_ngrams(str2,3,'chars'))
+    except:
+        return 0
+    return similarity
 
 def get_all_keys_values(dataset_path):
     stop_words=stopwords.words('english')
@@ -121,9 +127,6 @@ def extract_model_words (matrix):
     for i in range(len(matrix)): 
         if (contains(is_model_word, matrix[i])):
             all_model_words.append(matrix[i])
-        else:
-            if len(matrix[i])<3:
-                all_model_words.append(matrix[i])
 
     return all_model_words
 
@@ -236,26 +239,30 @@ def create_brand_dataframe (dataset_path):
                                 page_title+= ' ' + text[:start_idx]+ 'mp'
                     if mp_exists:
                         break
+                
                 if not (specification_data.get('model') is None):
                     model = specification_data.get('model')
-                    if(type(model)==str):
+                    
+            
+                    if(type(model)==str):   
+                        
                         model = model.split()
                         for m in model:
                             m = m.lower()
                             if m not in page_title and m != "/":
+                                
                                 page_title = m + " " + page_title + " "
 
                     else:
                         for m in model:
                             m = m.lower()
                             if m not in page_title :
-                                print ("burada:", m)
                                 if (m !="/"):
-                                    page_title = m + " " + page_title+ " "
-                    print(page_title)
+                                  page_title = m + " " + page_title+ " "
+                
+                
 
                 page_title=page_title.replace(' - ',' ')
-                page_title=page_title.replace('-',' ')
                 page_title=page_title.replace(',',' ')
                 page_title=page_title.replace(' /',' ')
                 page_title=page_title.replace(' | ',' ')
@@ -269,6 +276,13 @@ def create_brand_dataframe (dataset_path):
                 page_title=page_title.replace('minolta','konica')
                 page_title=page_title.replace(' dslr','')
                 page_title=page_title.replace(' slr','')
+                page_title=page_title.replace(' black','')
+                page_title=page_title.replace(' red','')
+                page_title=page_title.replace(' white','')
+                page_title=page_title.replace(' pink','')
+                page_title=page_title.replace(' silver','')
+                page_title=page_title.replace(' orange','')
+                page_title=page_title.replace(' grey','')
                 page_title=page_title.replace('cyber shot','cybershot')
                 page_title=page_title.replace('power shot','powershot')
                 page_title=page_title.replace('poweshot','powershot')
@@ -297,6 +311,7 @@ def create_brand_dataframe (dataset_path):
                 
                 
                 page_title=' '.join([ word for word in page_title.lower().split() if (not (word.lower() in stop_words)) and (not(word.lower() in skip_words))])
+                
                 if not (specification_data.get('brand') is None):
                     brand = specification_data.get('brand')
                 if(isinstance(brand, str)):    
@@ -416,6 +431,7 @@ def brand_blocking_keys(df):
     myList  = myList['page_title'].tolist()
     myList = [i.split(' ')[0] for i in myList]
     mySet = set(myList)
+    #mySet.remove("buy")
     mySet.remove("video")
     mySet.remove("get")
     mySet.remove("purchase")
@@ -427,12 +443,16 @@ def brand_blocking_keys(df):
     mySet.remove("ion") #new
     #mySet.remove("bell+howell")
     mySet.update(["emerson","enxun", "lg", "svp", "vizio", "vista", "philips", "toshiba","aigo", "phase", "advert", "thomson", "medion", "minox", "vageeswari", 
-                  "memoto", "hasselblad", "bell", "epson", "dahua", "minolta", "konica", "hikvision", "sanyo","pioneer", "shimano"])
+                  "memoto", "hasselblad", "bell", "epson", "dahua", "minolta", "konica", "hikvision", "sanyo","pioneer", "shimano","sj4000", "vibe",
+                  "keedox", "blackmagic", "rieter", "wopson",
+                  "croco", "g-cover","besnfoto", "eirmai", "wetrans", "crayola","sealife", "fvanor", "concepts", "sj4000", "vibe", "dxg", "fotopix","keedox","acorn",
+                  "brinno", "lowrance", "barbie","kitty","apple"])
     mySet.update(["hikvisionip", "hikvision1.3mp", "hiksion", "hiksision"])  #edgecases
     
     #hikvisionip, hikvision1.3mp hiksion hiksision 
     return mySet  
 
+#Onur
 def compute_brand_blocking(df):
     """Function used to compute blocks before the matching phase
 
@@ -469,9 +489,18 @@ def compute_brand_blocking(df):
         
         #edge cases for products belonging to 2 groups
         if(len(key_list) > 1 and (df.at[index,'brand'] == ' ') and ("leica" not in key_list) and ("tamron" not in key_list) and ("lowepro" not in key_list)and  ("sigma" not in key_list) and  ("polaroid" not in key_list) ):
-            key_list = ['accessory']
+            if("fuji" not in key_list and "fujifilm" not in key_list):
+                if("konica" not in key_list and "minolta" not in key_list):
+                    key_list = ['accessory']
         if("sandisk" in key_list and (df.at[index,'brand'] != ' ') and len(key_list) > 1 ):
             key_list.remove("sandisk")
+        if("other" in key_list and "lowepro" in (page_title_list) ):
+            key_list.add("lowepro")
+        if("other" in key_list and "vistaquest" in (page_title_list) ):
+            key_list=["vista"]
+            #vistaquest 
+        if("other" in key_list and "coolpix" in (page_title_list) and "nokia" not in key_list ):
+            key_list=["coolpix"]
         if("ricoh" in key_list):
             key_list.remove('ricoh')
             key_list=['pentax']
