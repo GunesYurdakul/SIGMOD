@@ -161,9 +161,23 @@ def process_others(blocking_key, brand_list, df):
 
 
 #Creates dataframe for brand blocking
+import os
+import json
+import pandas as pd
+import re
+import itertools
+from tqdm import tqdm
+import numpy as np
+from scipy.sparse import csr_matrix
+from scipy.sparse.csgraph import connected_components
+import nltk 
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+import pickle
+
 def create_brand_dataframe (dataset_path):
     stop_words=stopwords.words('english')
-
+    print('Creating df')
     skip_words=['alibaba.com','buy',
              'sale',
              'digital',
@@ -199,6 +213,23 @@ def create_brand_dataframe (dataset_path):
                 brand =' '
                 
                 page_title = specification_data.get('<page title>').lower()
+                model_words=['mega pixel','megapixel',' mp','mp ']
+                for key,text in specification_data.items():
+                    if type(text)==list:
+                        text=' '.join(text)
+                    text=text.lower()
+                    mp_exists=False
+                    for model_word in model_words:  
+                        start_idx = text.find(model_word)
+                        if start_idx!=-1:
+                            mp_exists=True
+                            if start_idx>4:
+                                page_title+= ' ' + text[start_idx-4:start_idx] + 'mp'
+                            else:
+                                page_title+= ' ' + text[:start_idx]+ 'mp'
+                    if mp_exists:
+                        break
+
                 page_title=page_title.replace(' - ',' ')
                 page_title=page_title.replace('-',' ')
                 page_title=page_title.replace(',',' ')
@@ -216,7 +247,7 @@ def create_brand_dataframe (dataset_path):
                 page_title=page_title.replace('power shot','powershot')
                 page_title=page_title.replace('poweshot','powershot')
                 page_title=page_title.replace('*istdl','*ist dl')
-                page_title=page_title.replace('series','')
+                page_title=page_title.replace(' series','')
                 page_title=page_title.replace('pentax k','pentax k ')
                 page_title=page_title.replace('pentax k  ','pentax k ')
                 page_title=page_title.replace('fine pix','finepix')
@@ -229,11 +260,14 @@ def create_brand_dataframe (dataset_path):
                 page_title=page_title.replace(') ',' ')
                 page_title=page_title.replace(' mp','mp')
                 page_title=page_title.replace(' p ','p ')
-                page_title=page_title.replace('megapixel','hikvision')
+                page_title=page_title.replace('megapixel','mp')
                 page_title=page_title.replace('hikvisionip','hikvision')
                 page_title=page_title.replace('hikvision1.3mp','hikvision 1.3mp')
                 page_title=page_title.replace('hiksion','hikvision')
                 page_title=page_title.replace('hiksision','hikvision')
+                page_title=page_title.replace('sony alpha a','sony a')
+                page_title=page_title.replace(' \u00ce\u0091','')
+                
                 
                 page_title=' '.join([ word for word in page_title.lower().split() if (not (word.lower() in stop_words)) and (not(word.lower() in skip_words))])
                 
@@ -249,7 +283,6 @@ def create_brand_dataframe (dataset_path):
   #  print(df)
     print('>>> Dataframe created successfully!\n')
     return df
-
 
 
 
