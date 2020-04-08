@@ -229,9 +229,28 @@ def create_brand_dataframe (dataset_path):
                                 page_title+= ' ' + text[:start_idx]+ 'mp'
                     if mp_exists:
                         break
+                
+                if not (specification_data.get('model') is None):
+                    model = specification_data.get('model')
+                    
+
+                    if(type(model)==str):   
+                        model = model.lower()
+                        if model not in page_title:
+                          page_title = model + " " + page_title + " "
+
+                    else:
+
+                        
+                        model = model.lower()
+                        for m in model:
+                            if m not in page_title:
+                                page_title = m + " " + page_title+ " "
+                    print(page_title)
+                
+                
 
                 page_title=page_title.replace(' - ',' ')
-                page_title=page_title.replace('-',' ')
                 page_title=page_title.replace(',',' ')
                 page_title=page_title.replace(' /',' ')
                 page_title=page_title.replace(' | ',' ')
