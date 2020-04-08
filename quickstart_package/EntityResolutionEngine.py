@@ -18,6 +18,8 @@ import numpy as np
 import main as sigmod
 from itertools import combinations 
 import helper as helper
+from fuzzywuzzy import  fuzz
+
 class EntityResolutionEngine():
 
 
@@ -40,7 +42,8 @@ class EntityResolutionEngine():
     
     def get_similarity(self,str1,str2):
         try:
-            similarity=helper.cosine_sim(helper.text_to_ngrams(str1,3,'spaces'),helper.text_to_ngrams(str2,3,'spaces'))
+            similarity=fuzz.partial_ratio(str1,str2)
+            #helper.cosine_sim(helper.text_to_ngrams(str1,3,'spaces'),helper.text_to_ngrams(str2,3,'spaces'))
         except:
             return 0
         return similarity
