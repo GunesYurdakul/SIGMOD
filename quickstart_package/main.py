@@ -12,12 +12,6 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 import pickle
 
-def get_similarity(str1,str2):
-    try:
-        similarity=helper.cosine_sim(helper.text_to_ngrams(str1,3,'chars'),helper.text_to_ngrams(str2,3,'chars'))
-    except:
-        return 0
-    return similarity
 
 def get_all_keys_values(dataset_path):
     stop_words=stopwords.words('english')
@@ -127,6 +121,9 @@ def extract_model_words (matrix):
     for i in range(len(matrix)): 
         if (contains(is_model_word, matrix[i])):
             all_model_words.append(matrix[i])
+        else:
+            if len(matrix[i])<3:
+                all_model_words.append(matrix[i])
 
     return all_model_words
 
@@ -186,7 +183,15 @@ def create_brand_dataframe (dataset_path):
              'instant',
              'type',
              'camera',
+             'camra',
+             'india',
+             'prices',
+             'reviews',
+             'plum','black','white','gray','purple','pink','grey','red','silver','orange','gold',
+             'advanced',
              'cameras',
+             'others',
+             'brand',
              'high',
              'resolution',
              'memory',
@@ -196,6 +201,8 @@ def create_brand_dataframe (dataset_path):
              'price',
              'body',
              'series',
+             'chinese',
+             'cheap',
              'tough',
              'refurbished',
              'color']
@@ -229,28 +236,26 @@ def create_brand_dataframe (dataset_path):
                                 page_title+= ' ' + text[:start_idx]+ 'mp'
                     if mp_exists:
                         break
-                
                 if not (specification_data.get('model') is None):
                     model = specification_data.get('model')
-                    
-
-                    if(type(model)==str):   
-                        model = model.lower()
-                        if model not in page_title:
-                          page_title = model + " " + page_title + " "
+                    if(type(model)==str):
+                        model = model.split()
+                        for m in model:
+                            m = m.lower()
+                            if m not in page_title and m != "/":
+                                page_title = m + " " + page_title + " "
 
                     else:
-
-                        
-                        model = model.lower()
                         for m in model:
-                            if m not in page_title:
-                                page_title = m + " " + page_title+ " "
+                            m = m.lower()
+                            if m not in page_title :
+                                print ("burada:", m)
+                                if (m !="/"):
+                                    page_title = m + " " + page_title+ " "
                     print(page_title)
-                
-                
 
                 page_title=page_title.replace(' - ',' ')
+                page_title=page_title.replace('-',' ')
                 page_title=page_title.replace(',',' ')
                 page_title=page_title.replace(' /',' ')
                 page_title=page_title.replace(' | ',' ')
@@ -264,13 +269,6 @@ def create_brand_dataframe (dataset_path):
                 page_title=page_title.replace('minolta','konica')
                 page_title=page_title.replace(' dslr','')
                 page_title=page_title.replace(' slr','')
-                page_title=page_title.replace(' black','')
-                page_title=page_title.replace(' red','')
-                page_title=page_title.replace(' white','')
-                page_title=page_title.replace(' pink','')
-                page_title=page_title.replace(' silver','')
-                page_title=page_title.replace(' orange','')
-                page_title=page_title.replace(' grey','')
                 page_title=page_title.replace('cyber shot','cybershot')
                 page_title=page_title.replace('power shot','powershot')
                 page_title=page_title.replace('poweshot','powershot')
@@ -299,7 +297,6 @@ def create_brand_dataframe (dataset_path):
                 
                 
                 page_title=' '.join([ word for word in page_title.lower().split() if (not (word.lower() in stop_words)) and (not(word.lower() in skip_words))])
-                
                 if not (specification_data.get('brand') is None):
                     brand = specification_data.get('brand')
                 if(isinstance(brand, str)):    

@@ -110,7 +110,7 @@ class EntityResolutionEngine():
                 print(i/(len(self.product_clusters)))
             pairs=combinations(product_group,2)
             for pair in pairs:
-                similarity = self.get_similarity(self.dataset_df.loc[pair[0]].words_to_compare,self.dataset_df.loc[pair[1]].words_to_compare)
+                similarity = self.get_similarity(self.dataset_df.loc[pair[0]].page_title,self.dataset_df.loc[pair[1]].page_title)
                 if similarity>threshold:
                     self.output_df = self.output_df.append({'left_spec_id': pair[0],'right_spec_id': pair[1], 'left_page_title': self.dataset_df.loc[pair[0]].page_title,'right_page_title':self.dataset_df.loc[pair[1]].page_title }, ignore_index=True)
         return 
