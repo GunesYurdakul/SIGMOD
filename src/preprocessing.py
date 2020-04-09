@@ -157,7 +157,7 @@ def create_brand_dataframe (dataset_path):
                 page_title=page_title.replace(' orange','')
                 page_title=page_title.replace(' grey','')
                 page_title=page_title.replace(' e ',' ')
-                page_title=page_title.replace('compact ','')
+                page_title=page_title.replace('compact ','ZZZ')
                 page_title=page_title.replace('cyber shot','cybershot')
                 page_title=page_title.replace('power shot','powershot')
                 page_title=page_title.replace('poweshot','powershot')
