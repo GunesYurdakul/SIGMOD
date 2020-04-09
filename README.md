@@ -48,18 +48,31 @@ Output graph is converted into a matrix to check the precision, recall and F-mea
 
 
 ## Results
+Current results on secret dataset: 
+- Precision: 0.83
+- Recall: 0.84
+- F-Measure: 0.84
+
+Current results on labelled dataset:
+- Precision: 0.96
+- Recall: 0.89
+- F-Measure: 0.92
 
 ## Prerequisites
 
 - Python 3.*
 - Pip
-
+- pip install -r requirements.txt
 
 ## Running
 
 Run the project:
 ```
-$ python main.py
+$ python main.py [DATASET PATH] [LABELLED DATASET PATH] [OUTPUT DATASET PATH]  [True:Test on labelled dataset, returns F-Measure | False: Generates output using whole dataset ] [similarity threshold 0-100]
+
+- The following command can be used to test results on labelled dataset:
+
+$ python main.py ../datasets/2013_camera_specs/ ../datasets/sigmod_large_labelled_dataset.csv ../datasets/output  True 10
 ```
 
 This command will produce a CSV file (the submission) in the output directory ("outputh_path") and will print intermediate results in the shell.
