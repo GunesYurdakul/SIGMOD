@@ -273,7 +273,7 @@ def compute_brand_blocking(df):
                 if(blocking_key =="general"):
                     blocking_key = "ge"
 
-                #blocking_key = subgroup_blocking(page_title, blocking_key)
+                blocking_key = subgroup_blocking(page_title, blocking_key)
                 key_list.append(blocking_key)
         if not key_list:
             key_list.append("other")
