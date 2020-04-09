@@ -1,28 +1,28 @@
 # SIGMOD20 Programming Contest Write-up Team Seguon
 
-##Introduction
+## Introduction
 This year's SIGMOD Programming Contest subject is solving the Entity Resolution problem of finding duplicate real-world objects in given dataset. 
 Challenge here is to develop an Entity Resolution System to to identify and match which product spesification from multiple represenets the same real-world camera or camera accessories objects.
 
-##Dataset
+## Dataset
 Test dataset consists of almost 30k camera and camera accessory spesifications in JSON format from multiple e-commerce websites. All spesifications include <Page title> attribute. 
 Other than that, dataset does not have a predefined structure and the information does not necessarily obey grammatical rules.
 There are also two validation set that consist of 6k rows of matching and unmatching objects with labels 1 and 0 respectively. 
 
 
-##Methodology
+## Methodology
 
-###Data Preprocessing
+### Data Preprocessing
 
-####Extracting Useful Information
+#### Extracting Useful Information
 Before checking for similarities, it was needed to decide which data attributes to use since there is no structure in the provided data. <Page title> is used since it is present in all data. In addition, we also tried to extract megapixel, brand name and model name
 attributes if they exist and added them to the page title in order to increase the similarity of possibly matching objects. 
 
-####Cleaning
+#### Cleaning
 As first step all of the spesifications are converted to lowercase letters. Then all the stopwords in English are eliminated. Additionally, unnecessary punctuations such as "-" and "/"  are deleted. 
 Some words such as "buy", "purchase", "promotion" that decrease the similarity but does not have any effect to identify an object are also eliminated after manual inspection of data.
 
-####Blocking
+#### Blocking
 We have used a blocking strategy that consists of two different phases. 
 
 In first phase, all the data is blocked using camera and accessory brands as blocking keys. Since most of the data spesification does not have an explicit brand name attribute, a list of brand names is generated
@@ -33,21 +33,21 @@ In the second phase of blocking, we applied another blocking inside the same blo
 First, the location of the blocking_key in the page title is found. After finding the exact location, we include the first consecutive word inside our model_name. Then, this model_name is searched inside the page title.
 If model_name is shared among some entities this model_name represents the subblock of a given block. This process is applied 4 times for 4 consecutive words to define the model of a brand and block them respectively.
    
-###Similarity Checking
+### Similarity Checking
 We have tried multiple methods for similarity checking such as Cosine, Jaccard, Levenshtein and Dice. All similarity checks are done by cleaning the object data, extracting the model words and generating its trigrams. 
 *** According to our experiments on validation set, cosine and Levensthein had similar results but latter was slightly more effective. As a result, Levensthein similarity function of fuzzywuzzy library is utilized to check similarities of objects
 after blocking. Thresold for similarity is chosen as 10 / 100. A relatively low threshold is chosen since using high threshold values resulted in increasing of precision but decreasing of recall.
 
-###Pairing and Output
+### Pairing and Output
 The objects that were in the same blocks and found similar are paired. As a result, our output consisted of pairs of objects that are categorized as duplicates by our system.
 We have represeneted the matching objects of our output and labelled dataset in a graph where objects are vertices and matching condition is an edge.
 
-###Validation
+### Validation
 After generating an output, the output is compared to the labelled dataset.  
 Output graph is converted into a matrix to check the precision, recall and F-measure of our Entity Resolution system.
 
 
-##Results
+## Results
 
 ## Prerequisites
 
