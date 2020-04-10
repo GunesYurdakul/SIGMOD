@@ -9,11 +9,12 @@ warnings.filterwarnings('ignore')
 
 """
     This script will:
-    1. create a Pandas DataFrame for the dataset. Note that only the <page title> attribute is considered (for example purposes);
-    2. partition the rows of the Pandas DataFrame in different blocks, accordingly with a blocking function;
-    3. create a Pandas DataFrame for all the pairs computed inside each block;
-    4. create a Pandas DataFrame containing all the matching pairs accordingly with a matching function;
-    5. export the Pandas DataFrame containing all the matching pairs in the "outputh_path" folder.
+       1-create a dataframe 
+       2- first blocking by brand names
+       3 - extracting model names for each brand group
+       3- then blocking by model names
+       4- finding pairs by comparing the page title and some features of the products for each block
+       5- generating output file
 """
 if __name__ == '__main__':
        
@@ -40,7 +41,7 @@ if __name__ == '__main__':
             precision,recall,f_measure,incorrect_pairs = entity_resolution_engine.calculate_f_measure()
             print('Precision:', precision,'Recall:', recall,'F-measure: ',f_measure)
         
-        entity_resolution_engine.output_df[['left_spec_id','right_spec_id']].to_csv(output_file_name+'.csv')
+        entity_resolution_engine.output_df[['left_spec_id','right_spec_id']].to_csv(output_file_name+'.csv',index=False)
     
     else:
         print('You have entered',len(sys.argv), 'command line arguments')
